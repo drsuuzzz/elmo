@@ -1,0 +1,6 @@
+{
+   "consumer_key" : "<fill me in>",
+    "consumer_secret":"<fill me in>",
+    "access_token_key":"<fill me in>",
+    "access_token_secret":"<fill me in>"
+}
