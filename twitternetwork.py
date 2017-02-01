@@ -1,4 +1,4 @@
-#   Copyright 2017 Suzy M Stiegelmeyer 
+#   Copyright 2017 Suzy M Stiegelmeyer
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -31,26 +31,45 @@ api = twitter.Api(consumer_key=mykeys['consumer_key'],
 
 # get who I'm following
 friends = api.GetFriends()
-fto = [item.screen_name for item in friends]
+fto = set([item.screen_name for item in friends])
 
 # get who is following me
 followers = api.GetFollowers()
-ffrom = [item.screen_name for item in followers]
+ffrom = set([item.screen_name for item in followers])
+
+# common
+both = fto & ffrom
 
 # make a directed graph
 g = networkx.DiGraph()
 
-for f in ffrom:
-    if f in fto:
-        g.add_edge("Elmos_Buddy",f)
-        g.add_edge(f, "Elmos_Buddy")
+for f in both:
+    g.add_edge("Elmos_Buddy",f)
+    g.add_edge(f, "Elmos_Buddy")
 
-# draw it
 networkx.draw_networkx(g)
-matplotlib.pyplot.savefig("blah.png")
+matplotlib.pyplot.savefig("friend.png")
+matplotlib.pyplot.close()
 
-# save it
-networkx.write_gml(g,"blah.gml")
+networkx.write_gml(g,"friends.gml")
+
+g2 = networkx.DiGraph()
+# tweets that were retweeted
+rt=api.GetRetweetsOfMe()
+for item in rt:
+    # who retweeted the tweet
+    lrt = api.GetRetweets(item.id)
+    for tweets in lrt:
+        if tweets.user.screen_name not in g2.node:
+            g2.add_edge(tweets.user.screen_name, "Elmos_Buddy")
+            if tweets.user.screen_name in both:
+                g2.add_edge("Elmos_Buddy", tweets.user.screen_name)
+        print(tweets.user.screen_name)
+
+networkx.draw_networkx(g2)
+matplotlib.pyplot.savefig("retweet.png")
+networkx.write_gml(g2, "retweet.gml")
+
 
 
 
